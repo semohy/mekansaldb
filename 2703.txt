@@ -1,0 +1,63 @@
+s1 : CREATE VIEW kitapci AS
+SELECT turler.ad as turad ,kitaplar.ad as kitapad ,kitaplar.tarih,kitaplar.satis_miktari,kitaplar.fiyati,yazarlar.adi as yazarad ,yazarlar.soyadi,dogum_sehir.sehir,yayinevleri.adi
+FROM kitaplar
+INNER join kitap_tur on kitaplar.kitap_id = kitap_tur.kitap_id
+INNER join turler on turler.tur_id = kitap_tur.tur_id
+INNER Join yayinevleri on yayinevleri.yayinevi_id = kitaplar.yayinevi_id
+INNER join kitap_yazar on kitap_yazar.kitap_id = kitaplar.kitap_id
+INNER join yazarlar on kitap_yazar.yazar_id = yazarlar.yazar_id
+Inner join dogum_sehir on dogum_sehir.dogum_yer_id = yazarlar.dogum_yer_id
+
+s2: select * from yazarlar
+LEFT join kitap_yazar on kitap_yazar.yazar_id = yazarlar.yazar_id
+left join kitaplar on kitaplar.kitap_id = kitap_yazar.kitap_id
+where kitaplar.kitap_id is null
+
+s3 : select count(yazarlar.yazar_id) as sayi from yazarlar
+left join kitap_yazar on kitap_yazar.yazar_id = yazarlar.yazar_id
+left join kitaplar on kitaplar.kitap_id = kitap_yazar.kitap_id
+where kitaplar.kitap_id is null
+
+s4 : SELECT dogum_sehir.sehir, count(yazarlar.yazar_id) as yazarSayisi FROM dogum_sehir
+INNER JOIN yazarlar on yazarlar.dogum_yer_id = dogum_sehir.dogum_yer_id
+LEFT JOIN kitap_yazar on kitap_yazar.yazar_id = yazarlar.yazar_id
+inner Join kitaplar on kitaplar.kitap_id = kitap_yazar.kitap_id
+GROUP by dogum_sehir.dogum_yer_id
+ORDER by yazarSayisi asc
+
+s5: SELECT turler.ad FROM turler
+left join kitap_tur on kitap_tur.tur_id = turler.tur_id
+left join kitaplar on kitaplar.kitap_id = kitap_tur.kitap_id
+where kitaplar.kitap_id is null
+
+s5 yöntem2 : SELECT * FROM turler WHERE turler.tur_id NOT IN (SELECT kitap_tur.tur_id FROM kitap_tur)
+
+s6 : SELECT turler.ad, COUNT(kitaplar.kitap_id) kitapSayisi FROM kitap_tur
+Inner JOIN kitaplar on kitap_tur.kitap_id = kitaplar.kitap_id
+INNER JOIN turler on kitap_tur.tur_id =  turler.tur_id
+GROUP BY turler.tur_id
+ORDER BY kitapSayisi ASC
+
+s7 : SELECT dogum_sehir.sehir FROM dogum_sehir
+LEFT join yazarlar on yazarlar.dogum_yer_id =  dogum_sehir.dogum_yer_id
+WHERE yazarlar.yazar_id is null
+
+s8 : SELECT * FROM yayinevleri 
+LEFT Join kitaplar on kitaplar.yayinevi_id = yayinevleri.yayinevi_id
+WHERE kitaplar.kitap_id IS NULL
+s8 yöntem2 : SELECT yayinevleri.adi FROM yayinevleri WHERE
+yayinevleri.yayinevi_id not in (SELECT kitaplar.yayinevi_id from kitaplar)
+
+s9 : SELECT concat(yazarlar.adi,' ',yazarlar.soyadi) as yazar, dogum_sehir.sehir FROM kitap_yazar
+RIGHT JOIN yazarlar on yazarlar.yazar_id = kitap_yazar.yazar_id
+LEFT join kitaplar on kitaplar.kitap_id = kitap_yazar.kitap_id
+inner join  dogum_sehir on dogum_sehir.dogum_yer_id = yazarlar.dogum_yer_id
+where kitaplar.kitap_id is null
+
+s9 yöntem2 : SELECT concat(yazarlar.adi,' ',yazarlar.soyadi) as yazar, dogum_sehir.sehir FROM yazarlar,dogum_sehir WHERE
+dogum_sehir.dogum_yer_id = yazarlar.dogum_yer_id  AND
+yazarlar.yazar_id NOT IN (SELECT kitap_yazar.yazar_id from kitap_yazar)
+
+s10 : SELECT yazarlar.adi,yazarlar.soyadi,COUNT(kitap_yazar.kitap_id) as kitap_sayisi FROM yazarlar
+LEFT JOIN kitap_yazar ON yazarlar.yazar_id=kitap_yazar.yazar_id
+GROUP BY yazarlar.yazar_id ORDER BY kitap_sayisi
